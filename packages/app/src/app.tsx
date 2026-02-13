@@ -124,6 +124,39 @@ function RouterRoot(props: ParentProps<{ appChildren?: JSX.Element }>) {
   )
 }
 
+const resolveBasePath = () => {
+  if (typeof window === "undefined") return "/"
+  const path = window.location.pathname
+  if (path === "/") return "/"
+  const segments = path.split("/").filter(Boolean)
+  if (segments.length === 0) return "/"
+  return "/" + segments[0]
+}
+
+const getStoredDefaultServerUrl = (platform: ReturnType<typeof usePlatform>) => {
+  if (platform.platform !== "web") return
+  const result = platform.getDefaultServerUrl?.()
+  if (result instanceof Promise) return
+  if (!result) return
+  return normalizeServerUrl(result)
+}
+
+const resolveDefaultServerUrl = (props: {
+  defaultUrl?: string
+  storedDefaultServerUrl?: string
+  hostname: string
+  origin: string
+  isDev: boolean
+  devHost?: string
+  devPort?: string
+}) => {
+  if (props.defaultUrl) return props.defaultUrl
+  if (props.storedDefaultServerUrl) return props.storedDefaultServerUrl
+  if (props.hostname.includes("opencode.ai")) return "http://localhost:4096"
+  if (props.isDev) return `http://${props.devHost ?? "localhost"}:${props.devPort ?? "4096"}`
+  return props.origin
+}
+
 export function AppBaseProviders(props: ParentProps<{ locale?: Locale }>) {
   return (
     <MetaProvider>
@@ -285,6 +318,7 @@ export function AppInterface(props: {
             <GlobalSyncProvider>
               <Dynamic
                 component={props.router ?? Router}
+                base={resolveBasePath()}
                 root={(routerProps) => <RouterRoot appChildren={props.children}>{routerProps.children}</RouterRoot>}
               >
                 <Route path="/" component={HomeRoute} />
