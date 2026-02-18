@@ -38,7 +38,7 @@ import { ModelsProvider } from "@/context/models"
 import { NotificationProvider } from "@/context/notification"
 import { PermissionProvider } from "@/context/permission"
 import { PromptProvider } from "@/context/prompt"
-import { ServerConnection, ServerProvider, serverName, useServer } from "@/context/server"
+import { normalizeServerUrl, ServerConnection, ServerProvider, serverName, useServer } from "@/context/server"
 import { SettingsProvider } from "@/context/settings"
 import { TerminalProvider } from "@/context/terminal"
 import DirectoryLayout from "@/pages/directory-layout"
@@ -50,13 +50,14 @@ const HomeRoute = lazy(() => import("@/pages/home"))
 const Session = lazy(() => import("@/pages/session"))
 const Loading = () => <div class="size-full" />
 
+
 const SessionRoute = () => (
   <SessionProviders>
     <Session />
   </SessionProviders>
-)
+);
 
-const SessionIndexRoute = () => <Navigate href="session" />
+const SessionIndexRoute = () => <Navigate href="session" />;
 
 function UiI18nBridge(props: ParentProps) {
   const language = useLanguage()
@@ -67,6 +68,8 @@ declare global {
   interface Window {
     __OPENCODE__?: {
       updaterEnabled?: boolean
+      serverPassword?: string
+      serverUrl?: string
       deepLinks?: string[]
       wsl?: boolean
     }
@@ -75,6 +78,7 @@ declare global {
     }
   }
 }
+
 
 function QueryProvider(props: ParentProps) {
   const client = new QueryClient()
@@ -98,7 +102,7 @@ function AppShellProviders(props: ParentProps) {
         </LayoutProvider>
       </PermissionProvider>
     </SettingsProvider>
-  )
+  );
 }
 
 function SessionProviders(props: ParentProps) {
@@ -110,7 +114,7 @@ function SessionProviders(props: ParentProps) {
         </PromptProvider>
       </FileProvider>
     </TerminalProvider>
-  )
+  );
 }
 
 function RouterRoot(props: ParentProps<{ appChildren?: JSX.Element }>) {
@@ -121,43 +125,48 @@ function RouterRoot(props: ParentProps<{ appChildren?: JSX.Element }>) {
         {props.children}
       </Suspense>
     </AppShellProviders>
-  )
+  );
 }
 
 const resolveBasePath = () => {
-  const envBase = import.meta.env.VITE_OPENCODE_BASE_PATH
-  if (envBase) return envBase
-  if (typeof window === "undefined") return "/"
-  const path = window.location.pathname
-  if (path === "/") return "/"
-  const segments = path.split("/").filter(Boolean)
-  if (segments.length === 0) return "/"
-  return "/" + segments[0]
-}
+  const envBase = import.meta.env.VITE_OPENCODE_BASE_PATH;
+  if (envBase) return envBase;
+  if (typeof window === "undefined") return "/";
+  const path = window.location.pathname;
+  if (path === "/") return "/";
+  const segments = path.split("/").filter(Boolean);
+  if (segments.length === 0) return "/";
+  return "/" + segments[0];
+};
 
-const getStoredDefaultServerUrl = (platform: ReturnType<typeof usePlatform>) => {
-  if (platform.platform !== "web") return
-  const result = platform.getDefaultServerUrl?.()
-  if (result instanceof Promise) return
-  if (!result) return
-  return normalizeServerUrl(result)
-}
+const getStoredDefaultServerUrl = (
+  platform: ReturnType<typeof usePlatform>,
+) => {
+  if (platform.platform !== "web") return;
+  const result = platform.getDefaultServerUrl?.();
+  if (result instanceof Promise) return;
+  if (!result) return;
+  return normalizeServerUrl(result);
+};
 
 const resolveDefaultServerUrl = (props: {
-  defaultUrl?: string
-  storedDefaultServerUrl?: string
-  hostname: string
-  origin: string
-  isDev: boolean
-  devHost?: string
-  devPort?: string
+  defaultUrl?: string;
+  storedDefaultServerUrl?: string;
+  hostname: string;
+  origin: string;
+  isDev: boolean;
+  devHost?: string;
+  devPort?: string;
 }) => {
-  if (props.defaultUrl) return props.defaultUrl
-  if (props.storedDefaultServerUrl) return props.storedDefaultServerUrl
-  if (props.hostname.includes("opencode.ai")) return "http://localhost:4096"
-  if (props.isDev) return `http://${props.devHost ?? "localhost"}:${props.devPort ?? "4096"}`
-  return props.origin
-}
+  if (props.defaultUrl) return props.defaultUrl;
+  if (props.storedDefaultServerUrl) return props.storedDefaultServerUrl;
+  if (typeof window !== "undefined" && window.__OPENCODE__?.serverUrl)
+    return window.__OPENCODE__.serverUrl;
+  if (props.hostname.includes("opencode.ai")) return "http://localhost:4096";
+  if (props.isDev)
+    return `http://${props.devHost ?? "localhost"}:${props.devPort ?? "4096"}`;
+  return props.origin;
+};
 
 export function AppBaseProviders(props: ParentProps<{ locale?: Locale }>) {
   return (
@@ -183,7 +192,7 @@ export function AppBaseProviders(props: ParentProps<{ locale?: Locale }>) {
         </LanguageProvider>
       </ThemeProvider>
     </MetaProvider>
-  )
+  );
 }
 
 const effectMinDuration =
@@ -334,5 +343,5 @@ export function AppInterface(props: {
         </ServerKey>
       </ConnectionGate>
     </ServerProvider>
-  )
+  );
 }
