@@ -62,6 +62,13 @@ declare global {
       updaterEnabled?: boolean
       deepLinks?: string[]
       wsl?: boolean
+      /** Server URL override for embedded/sub-path deployments */
+      serverUrl?: string
+      /** Router base path for sub-path deployments (e.g. "/caves/abc123") */
+      basePath?: string
+      /** HTTP basic auth credentials for the OpenCode server */
+      serverUsername?: string
+      serverPassword?: string
     }
   }
 }
@@ -144,6 +151,11 @@ function ServerKey(props: ParentProps) {
   )
 }
 
+const resolveBasePath = () => {
+  if (typeof window !== "undefined" && window.__OPENCODE__?.basePath) return window.__OPENCODE__.basePath
+  return undefined
+}
+
 export function AppInterface(props: {
   children?: JSX.Element
   defaultServer: ServerConnection.Key
@@ -155,6 +167,7 @@ export function AppInterface(props: {
         <GlobalSDKProvider>
           <GlobalSyncProvider>
             <Router
+              base={resolveBasePath()}
               root={(routerProps) => <RouterRoot appChildren={props.children}>{routerProps.children}</RouterRoot>}
             >
               <Route path="/" component={HomeRoute} />

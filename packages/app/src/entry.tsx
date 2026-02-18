@@ -111,6 +111,7 @@ const platform: Platform = {
 }
 
 const defaultUrl = iife(() => {
+  if (window.__OPENCODE__?.serverUrl) return window.__OPENCODE__.serverUrl
   const lsDefault = readDefaultServerUrl()
   if (lsDefault) return lsDefault
   if (location.hostname.includes("opencode.ai")) return "http://localhost:4096"
@@ -120,7 +121,12 @@ const defaultUrl = iife(() => {
 })
 
 if (root instanceof HTMLElement) {
-  const server: ServerConnection.Http = { type: "http", http: { url: defaultUrl } }
+  const http: ServerConnection.HttpBase = {
+    url: defaultUrl,
+    username: window.__OPENCODE__?.serverUsername,
+    password: window.__OPENCODE__?.serverPassword,
+  }
+  const server: ServerConnection.Http = { type: "http", http }
   render(
     () => (
       <PlatformProvider value={platform}>
