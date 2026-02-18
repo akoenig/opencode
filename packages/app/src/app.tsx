@@ -70,6 +70,7 @@ declare global {
       updaterEnabled?: boolean
       serverPassword?: string
       serverUrl?: string
+      basePath?: string
       deepLinks?: string[]
       wsl?: boolean
     }
@@ -131,6 +132,8 @@ function RouterRoot(props: ParentProps<{ appChildren?: JSX.Element }>) {
 const resolveBasePath = () => {
   const envBase = import.meta.env.VITE_OPENCODE_BASE_PATH;
   if (envBase) return envBase;
+  if (typeof window !== "undefined" && window.__OPENCODE__?.basePath)
+    return window.__OPENCODE__.basePath;
   if (typeof window === "undefined") return "/";
   const path = window.location.pathname;
   if (path === "/") return "/";

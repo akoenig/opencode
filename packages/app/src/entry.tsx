@@ -107,6 +107,7 @@ const getCurrentUrl = () => {
 const getDefaultUrl = () => {
   const lsDefault = readDefaultServerUrl()
   if (lsDefault) return lsDefault
+  if (typeof window !== "undefined" && window.__OPENCODE__?.serverUrl) return window.__OPENCODE__.serverUrl
   return getCurrentUrl()
 }
 
@@ -124,6 +125,7 @@ const platform: Platform = {
   },
   setDefaultServer: writeDefaultServerUrl,
 }
+
 
 if (root instanceof HTMLElement) {
   const server: ServerConnection.Http = { type: "http", http: { url: getCurrentUrl() } }
