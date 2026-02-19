@@ -66,9 +66,13 @@ declare global {
       serverUrl?: string
       /** Router base path for sub-path deployments (e.g. "/caves/abc123") */
       basePath?: string
+      /** Directory to auto-open on first load (e.g. injected by cave platform) */
+      directory?: string
       /** HTTP basic auth credentials for the OpenCode server */
       serverUsername?: string
       serverPassword?: string
+      /** Whether the app is running in an embedded context (e.g. cave proxy) */
+      embedded?: boolean
     }
   }
 }

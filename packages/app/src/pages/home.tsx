@@ -1,4 +1,4 @@
-import { createMemo, For, Match, Switch } from "solid-js"
+import { createMemo, For, Match, onMount, Switch } from "solid-js"
 import { Button } from "@opencode-ai/ui/button"
 import { Logo } from "@opencode-ai/ui/logo"
 import { useLayout } from "@/context/layout"
@@ -42,6 +42,13 @@ export default function Home() {
     server.projects.touch(directory)
     navigate(`/${base64Encode(directory)}`)
   }
+
+  // Auto-open directory injected by the cave platform (skips project selection on first load)
+  onMount(() => {
+    const directory = window.__OPENCODE__?.directory
+    if (!directory) return
+    openProject(directory)
+  })
 
   async function chooseProject() {
     function resolve(result: string | string[] | null) {
