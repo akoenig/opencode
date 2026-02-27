@@ -73,6 +73,10 @@ declare global {
       basePath?: string
       deepLinks?: string[]
       wsl?: boolean
+      /** Directory to auto-open on first load (e.g. injected by cave platform) */
+      directory?: string
+      /** Whether the app is running in an embedded context (e.g. cave proxy) */
+      embedded?: boolean
     }
     api?: {
       setTitlebar?: (theme: { mode: "light" | "dark" }) => Promise<void>
