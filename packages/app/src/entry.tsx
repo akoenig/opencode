@@ -65,6 +65,23 @@ const notify: Platform["notify"] = async (title, description, href) => {
   const inView = document.visibilityState === "visible" && document.hasFocus()
   if (inView) return
 
+  // When embedded in the cave platform, use the ServiceWorker's showNotification
+  // so the SW's notificationclick handler can properly focus the parent window
+  // and route navigation via postMessage. Using new Notification() from an iframe
+  // would navigate to a cave-proxy URL which results in a 404.
+  const caveId = window.__OPENCODE__?.caveId
+  if (caveId && "serviceWorker" in navigator) {
+    const registration = await navigator.serviceWorker.ready.catch(() => null)
+    if (registration) {
+      await registration.showNotification(title, {
+        body: description ?? "",
+        icon: "https://opencode.ai/favicon-96x96-v3.png",
+        data: { type: "opencode:notification-click", caveId },
+      })
+      return
+    }
+  }
+
   const notification = new Notification(title, {
     body: description ?? "",
     icon: "https://opencode.ai/favicon-96x96-v3.png",
@@ -125,7 +142,6 @@ const platform: Platform = {
   },
   setDefaultServer: writeDefaultServerUrl,
 }
-
 
 if (root instanceof HTMLElement) {
   const server: ServerConnection.Http = { type: "http", http: { url: getCurrentUrl() } }

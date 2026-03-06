@@ -38,7 +38,7 @@ import { ModelsProvider } from "@/context/models"
 import { NotificationProvider } from "@/context/notification"
 import { PermissionProvider } from "@/context/permission"
 import { PromptProvider } from "@/context/prompt"
-import { normalizeServerUrl, ServerConnection, ServerProvider, serverName, useServer } from "@/context/server"
+import { ServerConnection, ServerProvider, serverName, useServer } from "@/context/server"
 import { SettingsProvider } from "@/context/settings"
 import { TerminalProvider } from "@/context/terminal"
 import DirectoryLayout from "@/pages/directory-layout"
@@ -77,6 +77,8 @@ declare global {
       directory?: string
       /** Whether the app is running in an embedded context (e.g. cave proxy) */
       embedded?: boolean
+      /** Cave ID when running inside the cave platform (injected by cave proxy) */
+      caveId?: string
     }
     api?: {
       setTitlebar?: (theme: { mode: "light" | "dark" }) => Promise<void>
@@ -146,34 +148,6 @@ const resolveBasePath = () => {
   return "/" + segments[0];
 };
 
-const getStoredDefaultServerUrl = (
-  platform: ReturnType<typeof usePlatform>,
-) => {
-  if (platform.platform !== "web") return;
-  const result = platform.getDefaultServerUrl?.();
-  if (result instanceof Promise) return;
-  if (!result) return;
-  return normalizeServerUrl(result);
-};
-
-const resolveDefaultServerUrl = (props: {
-  defaultUrl?: string;
-  storedDefaultServerUrl?: string;
-  hostname: string;
-  origin: string;
-  isDev: boolean;
-  devHost?: string;
-  devPort?: string;
-}) => {
-  if (props.defaultUrl) return props.defaultUrl;
-  if (props.storedDefaultServerUrl) return props.storedDefaultServerUrl;
-  if (typeof window !== "undefined" && window.__OPENCODE__?.serverUrl)
-    return window.__OPENCODE__.serverUrl;
-  if (props.hostname.includes("opencode.ai")) return "http://localhost:4096";
-  if (props.isDev)
-    return `http://${props.devHost ?? "localhost"}:${props.devPort ?? "4096"}`;
-  return props.origin;
-};
 
 export function AppBaseProviders(props: ParentProps<{ locale?: Locale }>) {
   return (
