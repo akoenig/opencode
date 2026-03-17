@@ -144,13 +144,14 @@ const platform: Platform = {
 }
 
 if (root instanceof HTMLElement) {
-  const server: ServerConnection.Http = { type: "http", http: { url: getCurrentUrl() } }
+  const url = getDefaultUrl()
+  const server: ServerConnection.Http = { type: "http", http: { url } }
   render(
     () => (
       <PlatformProvider value={platform}>
         <AppBaseProviders>
           <AppInterface
-            defaultServer={ServerConnection.Key.make(getDefaultUrl())}
+            defaultServer={ServerConnection.Key.make(url)}
             servers={[server]}
             disableHealthCheck
           />
