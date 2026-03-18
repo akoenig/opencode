@@ -1,5 +1,6 @@
 import { type ComponentProps, createMemo, Show, splitProps } from "solid-js"
 import { createStore } from "solid-js/store"
+import { A } from "@solidjs/router"
 import { Card, CardDescription } from "./card"
 import { Collapsible } from "./collapsible"
 import { Icon } from "./icon"
@@ -96,14 +97,14 @@ export function ToolErrorCard(props: ToolErrorCardProps) {
                       when={split.href && split.subtitle}
                       fallback={<span data-slot="basic-tool-tool-subtitle">{subtitle()}</span>}
                     >
-                      <a
+                      <A
                         data-slot="basic-tool-tool-subtitle"
                         class="clickable subagent-link"
                         href={split.href!}
                         onClick={(e) => e.stopPropagation()}
                       >
                         {subtitle()}
-                      </a>
+                      </A>
                     </Show>
                   </div>
                 </div>

@@ -53,7 +53,7 @@ import { TextShimmer } from "./text-shimmer"
 import { AnimatedCountList } from "./tool-count-summary"
 import { ToolStatusTitle } from "./tool-status-title"
 import { animate } from "motion"
-import { useLocation } from "@solidjs/router"
+import { A, useLocation } from "@solidjs/router"
 import { attached, inline, kind } from "./message-file"
 
 function ShellSubmessage(props: { text: string; animate?: boolean }) {
@@ -1652,14 +1652,14 @@ ToolRegistry.register({
           <Show when={subtitle()}>
             <Switch>
               <Match when={href()}>
-                <a
+                <A
                   data-slot="basic-tool-tool-subtitle"
                   class="clickable subagent-link"
                   href={href()!}
                   onClick={(e) => e.stopPropagation()}
                 >
                   {subtitle()}
-                </a>
+                </A>
               </Match>
               <Match when={true}>
                 <span data-slot="basic-tool-tool-subtitle">{subtitle()}</span>
